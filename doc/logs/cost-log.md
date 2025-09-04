@@ -1,6 +1,6 @@
 # Nhật ký Chi phí
 
-## [2025-08-31] Chi phí ban đầu
+## [31/08/2025] Chi phí ban đầu
 
 Mô tả: Chi phí ước tính và các lựa chọn miễn phí cho dự án.
 
