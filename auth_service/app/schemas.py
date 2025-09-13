@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 # Schema để nhận dữ liệu khi đăng ký người dùng
@@ -8,11 +8,11 @@ class UserCreate(BaseModel):
 
 # Schema để trả về thông tin người dùng sau khi đăng ký thành công
 class UserResponse(BaseModel):
+    # Sửa lỗi: Cập nhật cú pháp từ class Config sang model_config
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     username: str
-
-    class Config:
-        from_attributes = True
 
 # Schema để nhận dữ liệu khi người dùng đăng nhập
 class UserLogin(BaseModel):

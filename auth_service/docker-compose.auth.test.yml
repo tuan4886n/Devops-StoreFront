@@ -1,0 +1,33 @@
+services:
+  auth-service:
+    build:
+      context: ..
+      dockerfile: ./auth_service/Dockerfile
+    container_name: auth-service-test
+    env_file:
+      - ./tests/.env.db.test
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      auth-db-test:
+        condition: service_healthy
+    command: ["pytest", "tests"]
+    networks:
+      - test_network
+
+  auth-db-test:
+    image: postgres:15
+    container_name: auth-db-test
+    env_file:
+      - ./tests/.env.db.test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test_network
+
+networks:
+  test_network:
+    driver: bridge

@@ -1,7 +1,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 # Lấy các giá trị cấu hình từ biến môi trường
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")

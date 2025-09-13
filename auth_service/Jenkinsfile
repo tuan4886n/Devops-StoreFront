@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+
+    environment {
+        SERVICE_NAME = "auth-service"
+        DOCKER_IMAGE = "storefront/${SERVICE_NAME}"
+        DOCKER_REGISTRY = "tuan4886"
+        TAG = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Build Image') {
+            steps {
+                script {
+                    docker.build("${DOCKER_IMAGE}:${TAG}", "./${SERVICE_NAME}")
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'docker-compose -f docker-compose.auth.test.yml up --abort-on-container-exit --build'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'dockerhub-credentials', url: '') {
+                        docker.image("${DOCKER_IMAGE}:${TAG}").push()
+                        docker.image("${DOCKER_IMAGE}:${env.BUILD_NUMBER}").push('latest')
+                    }
+                }
+            }
+        }
+
+        // tạm hoãn stage deploy đến khi viết kubenester (k3s)
+    }
+
+    post {
+        always {
+            // Dọn dẹp không gian làm việc sau khi build hoàn tất
+            cleanWs()
+        }
+    }
+}
