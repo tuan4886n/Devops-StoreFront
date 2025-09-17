@@ -1,15 +1,22 @@
-FROM jenkins/jenkins:lts-jdk17
+# Sử dụng image Jenkins LTS làm nền
+FROM jenkins/jenkins:lts
 
+# Chuyển sang user root để cài đặt các công cụ cần thiết
 USER root
 
 # Cài đặt sudo và các công cụ cần thiết
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends sudo docker.io curl && \
+    apt-get install -y --no-install-recommends sudo docker.io curl wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Cài đặt Docker Compose
+# Tải phiên bản mới nhất từ GitHub và đặt vào thư mục /usr/local/bin
+RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
+
 # Thêm người dùng jenkins vào nhóm docker để có quyền truy cập
-RUN usermod -aG docker jenkins
+RUN groupadd -f docker && usermod -aG docker jenkins
 
 # Cài đặt các plugin bằng CLI chính thức.
 # Bao gồm cả các plugin bị lỗi và các plugin thường dùng.
@@ -18,11 +25,13 @@ RUN jenkins-plugin-cli --plugins \
     authentication-tokens \
     docker-commons \
     matrix-auth \
-    workflow-aggregator \
     pipeline-github-lib \
     credentials \
     plain-credentials \
-    ssh-credentials
+    ssh-credentials \
+    git \
+    git-client \
+    workflow-basic-steps
 
 # Trở lại user jenkins mặc định
 USER jenkins

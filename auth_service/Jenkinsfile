@@ -2,36 +2,45 @@ pipeline {
     agent any
 
     environment {
-        SERVICE_NAME = "auth-service"
+        SERVICE_NAME = "auth_service"
         DOCKER_IMAGE = "storefront/${SERVICE_NAME}"
         DOCKER_REGISTRY = "tuan4886"
-        TAG = "${env.BUILD_NUMBER}"
+        TAG = "${env.BUILD_NUMBER ?: 'dev'}"
     }
 
     stages {
         stage('Build Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}:${TAG}", "./${SERVICE_NAME}")
+                    sh "docker build -t ${DOCKER_IMAGE}:${TAG} -f auth_service/Dockerfile ."
                 }
             }
         }
 
         stage('Test') {
             steps {
-                sh 'docker-compose -f docker-compose.auth.test.yml up --abort-on-container-exit --build'
+                dir("${SERVICE_NAME}") {
+                    // dọn dẹp các container và mạng cũ trước khi chạy
+                    sh "docker-compose -f docker-compose.auth.test.yml down"
+
+                    sh 'docker-compose -f docker-compose.auth.test.yml up --abort-on-container-exit --build'
+                }
             }
         }
 
         stage('Push to Docker Hub') {
             when {
-                branch 'main'
+                branch "${params.BRANCH_NAME}"
             }
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'dockerhub-credentials', url: '') {
-                        docker.image("${DOCKER_IMAGE}:${TAG}").push()
-                        docker.image("${DOCKER_IMAGE}:${env.BUILD_NUMBER}").push('latest')
+                        // Gắn thêm tag 'latest' cho image vừa build
+                        sh "docker tag ${DOCKER_FULL_IMAGE}:${TAG} ${DOCKER_FULL_IMAGE}:latest"
+                        
+                        // Đẩy cả hai tag lên Docker Hub
+                        sh "docker push ${DOCKER_FULL_IMAGE}:${TAG}"
+                        sh "docker push ${DOCKER_FULL_IMAGE}:latest"
                     }
                 }
             }
