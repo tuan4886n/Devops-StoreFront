@@ -10,7 +10,10 @@ from .auth_utils import verify_password, create_access_token, get_current_user
 # Tạo tất cả các bảng trong database
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(
+    title="User Authentication Service",
+    description="Dịch vụ quản lý người dùng, đăng ký, đăng nhập và xác thực (Microservice)",
+)
 
 # Dependency để lấy Session của database
 def get_db():
