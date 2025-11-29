@@ -2,27 +2,25 @@ pipeline {
     agent any
 
     environment {
-        SERVICE_NAME   = "auth_service"
-        DOCKER_IMAGE   = "storefront/${SERVICE_NAME}"
-        DOCKER_REGISTRY= "tuan4886"
-        TAG            = "${env.BUILD_NUMBER ?: 'dev'}"
-        DOCKER_REPO    = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}" 
+        SERVICE_NAME    = "auth_service"
+        DOCKER_IMAGE    = "storefront-${SERVICE_NAME}"
+        DOCKER_REGISTRY = "tuan4886"
+        TAG             = "${env.BUILD_NUMBER ?: 'dev'}"
+        DOCKER_REPO     = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}" 
     }
 
     stages {
         stage('Test') {
             steps {
-                script {
-                    echo "Starting build and test for ${SERVICE_NAME}..."
-                    
-                    // Dọn container và volume cũ, giữ image để cache build nhanh hơn
-                    sh "docker-compose -f docker-compose.auth.test.yml down -v"
-                    
-                    // Chạy test, fail ngay nếu service test fail
-                    sh "docker-compose -f docker-compose.auth.test.yml up --build --exit-code-from ${SERVICE_NAME}"
-                    
-                    // Dọn container và volume sau test
-                    sh "docker-compose -f docker-compose.auth.test.yml down -v"
+                echo 'Starting build and test for auth_service...'
+                dir('auth_service') {
+                    // Dọn container trước khi test
+                    sh 'docker-compose -f docker-compose.auth.test.yml down -v'
+
+                    // Build và chạy test, log kết quả rõ ràng
+                    sh 'docker-compose -f docker-compose.auth.test.yml up --build --exit-code-from auth-service-test'
+                    // Dọn sau test
+                    sh 'docker-compose -f docker-compose.auth.test.yml down -v'
                 }
             }
         }
@@ -31,23 +29,18 @@ pipeline {
             steps {
                 script {
                     echo "Building Production Image..."
-                    // --pull để luôn lấy base image mới nhất
                     sh "docker build --pull -t ${DOCKER_REPO}:${TAG} -f auth_service/Dockerfile ."
                 }
             }
         }
 
         stage('Push to Docker Hub') {
-            when {
-                branch 'main' // chỉ push khi build từ branch chính
-            }
             steps {
                 script {
+                    echo "Pushing image to Docker Hub..."
                     withDockerRegistry(credentialsId: 'dockerhub-credentials', url: '') {
-                        // Gắn thêm tag latest
+                        // Chỉ push với tag latest
                         sh "docker tag ${DOCKER_REPO}:${TAG} ${DOCKER_REPO}:latest"
-                        // Push cả hai tag
-                        sh "docker push ${DOCKER_REPO}:${TAG}"
                         sh "docker push ${DOCKER_REPO}:latest"
                     }
                 }
@@ -59,7 +52,7 @@ pipeline {
 
     post {
         always {
-            // Dọn workspace sau khi build
+            echo "Cleaning workspace..."
             cleanWs()
         }
     }

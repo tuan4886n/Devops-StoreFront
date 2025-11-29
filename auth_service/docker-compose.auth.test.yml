@@ -23,7 +23,7 @@ services:
     
     restart: "no" # Ngăn không cho container khởi động lại sau khi Pytest hoàn thành
     networks:
-      - test_network
+      - auth_test_network
 
   auth-db-test:
     image: postgres:15
@@ -36,8 +36,9 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - test_network
+      - auth_test_network
 
 networks:
-  test_network:
+  auth_test_network:
+    name: auth_test_network
     driver: bridge
