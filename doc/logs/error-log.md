@@ -37,3 +37,13 @@ Nguyên nhân: Phiên bản Jenkins đang sử dụng (2.525-jdk17) không tươ
 Giải pháp: Cập nhật Dockerfile để sử dụng phiên bản Jenkins LTS ổn định nhất (jenkins/jenkins:lts-slim-jdk17) và cài đặt trực tiếp các plugin cần thiết bằng lệnh jenkins-plugin-cli trong Dockerfile.
 
 Kết quả: Sau khi cập nhật Dockerfile và cài đặt lại plugin, Jenkins đã khởi động thành công và hoạt động ổn định.
+
+## [28/11/2025] Lỗi và khắc phục
+
+- Lỗi: ValueError mật khẩu >72 ký tự.  
+  Fix: Cắt mật khẩu ≤72 ký tự.
+
+- Lỗi: AttributeError 'bcrypt' không có '**about**'.  
+  Fix: Pin version passlib==1.7.4, bcrypt==4.0.1, chuyển Python 3.11.
+
+Trạng thái: Đã fix, test pass.

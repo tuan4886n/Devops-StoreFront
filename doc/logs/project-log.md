@@ -23,3 +23,10 @@ Mục tiêu: Khắc phục các lỗi trong pipeline Jenkins để hoàn thành 
 Tiến độ: Đã khắc phục thành công các lỗi sudo: not found, Permission denied và no such file or directory.
 
 Kết quả: Pipeline CI/CD cho auth-service đã hoạt động hoàn toàn tự động, từ build, test cho đến deploy.
+
+## [28/11/2025] Trở lại dự án sau 3 tháng
+
+Lý do: Tạm dừng vì đi làm thêm.  
+Hoạt động: Quay lại cải tiến auth_service, sửa Dockerfile, tối ưu Jenkinsfile, chạy lại test.  
+Kết quả: Test pass, pipeline ổn định.  
+Kế hoạch: Chuẩn bị triển khai lên K3s.

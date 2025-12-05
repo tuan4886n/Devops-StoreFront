@@ -63,3 +63,10 @@ Giảm số lượng file, giữ cho dự án gọn gàng và dễ quản lý.
 Đảm bảo tính độc lập của các database test vẫn được duy trì trong cùng một file.
 
 Hành động: File docker-compose.test.yml sẽ được cập nhật để chứa tất cả các database test trong tương lai.
+
+## [28/11/2025] Quyết định kỹ thuật
+
+- Chọn Python 3.11 thay vì 3.13 để tránh lỗi thư viện.
+- Pin version passlib==1.7.4 và bcrypt==4.0.1.
+- Dùng Gunicorn + UvicornWorker thay vì chỉ Uvicorn cho production.  
+  Lý do: Đảm bảo tương thích, ổn định và khả năng scale.
