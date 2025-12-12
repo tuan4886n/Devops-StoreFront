@@ -10,6 +10,7 @@ venv/
 .venv/
 
 # Environment files
+auth_service/tests/.env.db.test
 .env
 .env.db
 .env.local
