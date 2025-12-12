@@ -70,7 +70,27 @@ pipeline {
             }
         }
 
-        // Stage deploy sẽ thêm sau khi viết k3s manifest
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    echo "Deploying ${DOCKER_REPO}:latest to Kubernetes..."
+
+                    // Apply secret từ Jenkins Credential (file secret.yml)
+                    withCredentials([file(credentialsId: 'k8s-secret-file', variable: 'SECRET_FILE')]) {
+                        sh 'kubectl apply -f $SECRET_FILE'
+                    }
+
+                    // Apply deployment và service manifest
+                    sh '''
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+                    '''
+
+                    // Kiểm tra rollout thành công
+                    sh "kubectl rollout status deployment/${SERVICE_NAME}-deployment"
+                }
+            }
+        }
     }
 
     post {
