@@ -73,26 +73,27 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    echo "Deploying ${DOCKER_REPO}:latest to Kubernetes..."
+                    echo "Deploying ${DOCKER_REPO}:latest to Docker Desktop Kubernetes..."
 
-                    // Apply secret từ Jenkins Credential (file secret.yml)
-                    withCredentials([file(credentialsId: 'k8s-secret-file', variable: 'SECRET_FILE')]) {
-                        sh 'kubectl apply -f $SECRET_FILE'
+                    withCredentials([file(credentialsId: 'docker-desktop-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                        // Apply secret manifest
+                        withCredentials([file(credentialsId: 'k8s-secret-file-auth_service', variable: 'SECRET_FILE')]) {
+                            sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f $SECRET_FILE"
+                        }
+
+                        // Apply deployment và service
+                        sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f auth_service/k8s/deployment.yml"
+                        sh "kubectl --kubeconfig=$KUBECONFIG_FILE apply -f auth_service/k8s/service.yml"
+
+                        // Kiểm tra rollout
+                        sh "kubectl --kubeconfig=$KUBECONFIG_FILE rollout status deployment/auth-service --timeout=60s"
                     }
 
-                    // Apply deployment và service manifest
-                    sh '''
-                        kubectl apply -f k8s/deployment.yaml
-                        kubectl apply -f k8s/service.yaml
-                    '''
-
-                    // Kiểm tra rollout thành công
-                    sh "kubectl rollout status deployment/${SERVICE_NAME}-deployment"
+                    echo "Deploy lên Docker Desktop Kubernetes thành công!"
                 }
             }
         }
     }
-
     post {
         always {
             echo "Cleaning workspace..."

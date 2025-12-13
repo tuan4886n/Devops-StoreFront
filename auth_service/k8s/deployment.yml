@@ -13,15 +13,15 @@ spec:
     metadata:
       labels:
         app: auth-service
-  spec:
-    containers:
-      - name: auth-service
-        image: tuan4886/storefront-auth_service:latest
-        ports:
-          - containerPort: 5000
-        envFrom:
-          - secretRef:
-              name: auth-service-secret
+    spec:
+      containers:
+        - name: auth-service
+          image: tuan4886/storefront-auth_service:latest
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - secretRef:
+                name: auth-service-secret
           resources:
             requests:
               cpu: "100m"
